@@ -42,11 +42,23 @@ SCHEMA = T.StructType([
     T.StructField("src_json", T.StringType(), True)
 ])
 
-directory = r'C:\Users\benedict.browder\Desktop\FMV Data Processing\raw\template_fmv_cdao_seq_metadata'
+folder = r'C:\Users\benedict.browder\Desktop\FMV Data Processing\raw\template_fmv_cdao_seq_metadata'
+output_path = r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\tabulated\template_fmv_mp4s_tabulated.csv'
+incremental = os.path.isfile(output_path)
+directory = os.listdir(folder)
+
+if incremental == True:
+    output_spark = SparkSession.builder.appName("output").master("local[2]").getOrCreate()
+    output = pandas.read_csv(output_path)
+    output_df = spark.createDataFrame(output)
+    output_list = output_df.withColumn("sequence_id", F.concat(F.col("sequence_id"), F.lit(".json"))).select('sequence_id').toPandas()['sequence_id'].tolist()
+    directory = [x for x in directory if x not in output_list]
+    print(directory)
+
 rows = []
-for name in os.listdir(directory):
+for name in directory:
     # Open file
-    file_path = os.path.join(directory, name)
+    file_path = os.path.join(folder, name)
     with open(file_path, encoding="utf-8") as json_file:
         json_data = json_file.read()
     # file modification timestamp of a file

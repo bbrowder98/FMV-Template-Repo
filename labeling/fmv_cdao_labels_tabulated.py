@@ -179,11 +179,22 @@ SCHEMA = T.StructType([
     T.StructField("src_json", T.StringType(), True)
 ])
 
-directory = r'C:\Users\benedict.browder\Desktop\FMV Data Processing\raw\Avalanche_USCG_20220930_json'
+folder = r'C:\Users\benedict.browder\Desktop\FMV Data Processing\raw\Avalanche_USCG_20220930_json'
+output_path = r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\labeling\template_fmv_cdao_labels_tabulated.csv'
+incremental = os.path.isfile(output_path)
+directory = os.listdir(folder)
+if incremental == True:
+    output_spark = SparkSession.builder.appName("output").master("local[2]").getOrCreate()
+    output = pandas.read_csv(output_path)
+    output_df = spark.createDataFrame(output)
+    output_list = output_df.withColumn("dataset_name", F.concat(F.col("dataset_name"), F.lit(".json"))).select('dataset_name').toPandas()['dataset_name'].tolist()
+    directory = [x for x in directory if x not in output_list]
+    print(directory)
+
 rows = []
-for name in os.listdir(directory):
+for name in directory:
     # Open file
-    file_path = os.path.join(directory, name)
+    file_path = os.path.join(folder, name)
     with open(file_path, encoding="utf-8") as json_file:
         json_data = json_file.read()
     # file modification timestamp of a file
@@ -194,29 +205,32 @@ for name in os.listdir(directory):
     row_contents = [file_path, str(modified), int(size), json_data]
     rows.append(row_contents)
 
-df = spark.createDataFrame(rows, SCHEMA)
-labels_df = expand_json_column(df, "src_json")
-labels_df = labels_df.transform(rename_columns)
-labels_df = labels_df.drop("src_json")  # drop already parsed columns
-labels_df = labels_df.transform(explode_by_sequence)
-labels_df = labels_df.transform(get_versioning_info)
-labels_df = labels_df.transform(keep_only_latest_label)
-labels_df = labels_df.drop("latest_label_version")  # now redundant
-labels_df = labels_df.withColumn("ingest_date", to_timestamp(F.col("modified")))
-labels_df = labels_df.drop("modified")
-labels_df = labels_df.withColumn("labeling_fps", F.lit(30))
-labels_df = labels_df.withColumn("legacy", F.lit(False))
-labels_df = labels_df.withColumn("label_source", F.lit("Anno.Ai"))
-labels_df = labels_df.transform(explode_by_object)
-labels_df = labels_df.transform(explode_by_label)
-labels_df = labels_df.select(
-        primary_key(F.col("sequence_id"), F.col("frame")).alias("primary_key"),
-        F.element_at(F.col("labels.id"), 1).alias("label_id"),
-        F.element_at(F.col("labels.name"), 1).alias("category"),
-        F.element_at(F.col("labels.key"), 1).alias("object_iri"),
-        "*"
-    )
-labels_df = labels_df.drop("labels")
-labels_df = labels_df.transform(explode_coordinates)
-labels_df = labels_df.withColumn("traits", F.to_json(F.col("traits")))
+labels_df = spark.createDataFrame(rows, SCHEMA)
+if directory != []:
+    labels_df = expand_json_column(labels_df, "src_json")
+    labels_df = labels_df.transform(rename_columns)
+    labels_df = labels_df.drop("src_json")  # drop already parsed columns
+    labels_df = labels_df.transform(explode_by_sequence)
+    labels_df = labels_df.transform(get_versioning_info)
+    labels_df = labels_df.transform(keep_only_latest_label)
+    labels_df = labels_df.drop("latest_label_version")  # now redundant
+    labels_df = labels_df.withColumn("ingest_date", to_timestamp(F.col("modified")))
+    labels_df = labels_df.drop("modified")
+    labels_df = labels_df.withColumn("labeling_fps", F.lit(30))
+    labels_df = labels_df.withColumn("legacy", F.lit(False))
+    labels_df = labels_df.withColumn("label_source", F.lit("Anno.Ai"))
+    labels_df = labels_df.transform(explode_by_object)
+    labels_df = labels_df.transform(explode_by_label)
+    labels_df = labels_df.select(
+            primary_key(F.col("sequence_id"), F.col("frame")).alias("primary_key"),
+            F.element_at(F.col("labels.id"), 1).alias("label_id"),
+            F.element_at(F.col("labels.name"), 1).alias("category"),
+            F.element_at(F.col("labels.key"), 1).alias("object_iri"),
+            "*"
+        )
+    labels_df = labels_df.drop("labels")
+    labels_df = labels_df.transform(explode_coordinates)
+    labels_df = labels_df.withColumn("traits", F.to_json(F.col("traits")))
+if incremental == True:
+    labels_df = output_df.unionByName(labels_df)
 labels_df.toPandas().to_csv(r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\labeling\template_fmv_cdao_labels_tabulated.csv', index=False)
