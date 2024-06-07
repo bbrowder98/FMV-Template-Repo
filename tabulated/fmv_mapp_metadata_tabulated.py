@@ -50,6 +50,5 @@ for name in os.listdir(directory):
 
 df = spark.createDataFrame(rows, SCHEMA)
 df = df.orderBy(df.sequence_id.desc(), df.modified.desc())
+#saved to json in order to avoid csv cell limit for large json columns
 df.toPandas().to_csv(r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\tabulated\fmv_mapp_metadata_tabulated.json', index=False)
-#df.repartition(1).write.csv(r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\tabulated\fmv_mapp_metadata_tabulated.xlsx', mode='overwrite')
-#print(df.iloc[0])

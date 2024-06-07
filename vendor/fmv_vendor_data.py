@@ -86,4 +86,5 @@ for file_path, file_system in filesystems.items():
     filesysfile_systemtems = file_system.join(sequences_df.select("sequence_id"), "sequence_id", "inner")
     # sequences_df = sequences_df.select("*", F.col(file_path).alias("path"))
     file_system.foreach(process_filesystem)
+#saved to json in order to avoid csv cell limit for large json columns
 sequences_df.toPandas().to_csv(r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\vendor\template_fmv_vendor_test.json', index=False)

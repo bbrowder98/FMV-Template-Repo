@@ -97,5 +97,6 @@ sequences_df = sequences_df.join(label_reports_df, "sequence_id", "left")
 sequences_df = sequences_df.withColumn("is_labeled", is_labeled(F.col("label_version")))
 sequences_df = sequences_df.transform(add_label_size_to_filesize)
 
+#saved to json in order to avoid csv cell limit for large json columns
 sequences_df.toPandas().to_csv(r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\enrichments\template_fmv_sequences_full.json', index=False)
 sequences_df = spark.createDataFrame(df)

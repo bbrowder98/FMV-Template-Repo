@@ -15,4 +15,5 @@ sequences_df = spark.createDataFrame(df)
 VENDOR_ONLY_SPLITS = ["training", "validation"]
 sequences_df = sequences_df.where(F.col("is_labeled") == True)
 sequences_df = sequences_df.where(F.col("split").isin(VENDOR_ONLY_SPLITS))
+#saved to json in order to avoid csv cell limit for large json columns
 sequences_df.toPandas().to_csv(r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\vendor\template_fmv_sequences_vendor.json', index=False)
