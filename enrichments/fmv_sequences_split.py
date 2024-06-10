@@ -62,7 +62,7 @@ def split_assigned_by():
     return F.lit(USER_ID)
 
 spark = SparkSession.builder.appName("test").master("local[1]").getOrCreate()
-df = pandas.read_csv(r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\enrichments\template_fmv_sequences.csv')
+df = pandas.read_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\enrichments\template_fmv_sequences.csv')
 sequences_df = spark.createDataFrame(df)
 sequences_df = sequences_df.withColumn("split_key", split_key(F.col("src_record_key"), F.col("batch")))
 sequences_df = sequences_df.withColumn("split_key_hash", split_key_hash(F.col("split_key")))
@@ -75,4 +75,4 @@ sequences_df = sequences_df.withColumn("ingest_date", F.col("ingest_date").cast(
 sequences_df = sequences_df.withColumn("split_timestamp", split_timestamp(F.col("ingest_date")))
 sequences_df = sequences_df.withColumn("split_assigned_by", split_assigned_by())
 
-sequences_df.toPandas().to_csv(r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\enrichments\template_fmv_sequences_split.csv', index=False)
+sequences_df.toPandas().to_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\enrichments\template_fmv_sequences_split.csv', index=False)

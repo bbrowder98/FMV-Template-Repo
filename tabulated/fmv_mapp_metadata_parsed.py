@@ -165,7 +165,7 @@ def look_angle_bucket(phi):
             .when(phi < 90, 'LA6') \
             .otherwise('Missing')
 
-df = pandas.read_csv(r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\tabulated\template_fmv_mapp_metadata_by_frame.csv')
+df = pandas.read_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\tabulated\template_fmv_mapp_metadata_by_frame.csv')
 frames_df = spark.createDataFrame(df)
 frames_df = frames_df.replace({"SLT_NONE": ""})
 frames_df = frames_df.transform(derive_and_bucket_telemetry)
@@ -174,4 +174,4 @@ frames_df = frames_df.transform(compute_modes_and_medians)
 
 METADATA_COLUMNS = ["sensor_band", "gsd", "look_angle_deg", "solar_ned_phi", "platform_heading_angle"]
 frames_df = frames_df.withColumn("metadata_quality", metadata_quality(METADATA_COLUMNS))
-frames_df.toPandas().to_csv(r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\tabulated\template_fmv_mapp_metadata_parsed.csv', index=False)
+frames_df.toPandas().to_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\tabulated\template_fmv_mapp_metadata_parsed.csv', index=False)

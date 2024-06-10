@@ -90,7 +90,7 @@ def avg_center_ires_ft(ires_col1, ires_col2):
 
 spark = SparkSession.builder.appName("test").master("local[1]").getOrCreate()
 
-df = pandas.read_csv(r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\tabulated\fmv_mapp_metadata_tabulated.json')
+df = pandas.read_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\tabulated\fmv_mapp_metadata_tabulated.json')
 metadata_df = spark.createDataFrame(df)
 metadata_df = metadata_df.drop("modified", "filesize_bytes")
 metadata_df = metadata_df.transform(explode_by_frame)
@@ -103,5 +103,5 @@ metadata_df = metadata_df.transform(compute_starts_and_ends)
 metadata_df = metadata_df.transform(compute_global_averages)
 metadata_df = metadata_df.withColumn("src_json", F.to_json(F.col("src_json"))) \
                         .withColumn("all_fields", F.to_json(F.col("all_fields")))                        
-metadata_df.toPandas().to_csv(r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\tabulated\template_fmv_mapp_metadata_by_frame.csv', index=False)
+metadata_df.toPandas().to_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\tabulated\template_fmv_mapp_metadata_by_frame.csv', index=False)
 

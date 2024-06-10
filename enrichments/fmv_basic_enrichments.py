@@ -123,7 +123,7 @@ def time_offset_s(max_frame_count_col, time_offset_s_col, offset):
     )
 
 spark = SparkSession.builder.appName("test").master("local[1]").getOrCreate()
-df = pandas.read_csv(r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\tabulated\template_fmv_sequences_unenriched.csv')
+df = pandas.read_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\tabulated\template_fmv_sequences_unenriched.csv')
 sequences_df = spark.createDataFrame(df)
 sequences_df = sequences_df.withColumn("batch", batch(F.col("seq_metadata_filepath"), 2))
 sequences_df = sequences_df.withColumn("is_maritime", is_maritime(F.col("seq_metadata_filepath")))
@@ -137,4 +137,4 @@ sequences_df = sequences_df.repartition(5, "src_record_key")
 sequences_df = sequences_df.sortWithinPartitions("src_record_key", "time_offset_s")
 sequences_df = sequences_df.dropDuplicates()
 
-sequences_df.toPandas().to_csv(r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\enrichments\template_fmv_sequences.csv', index=False)
+sequences_df.toPandas().to_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\enrichments\template_fmv_sequences.csv', index=False)

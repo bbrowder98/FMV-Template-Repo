@@ -22,10 +22,10 @@ def add_ontology_fields(df, ontology_df):
     df = df.join(F.broadcast(ontology_df), "object_iri", "left")
     return df
 
-df = pandas.read_csv(r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\labeling\template_fmv_cdao_labels_tabulated.csv')
-ontology_df = pandas.read_csv(r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\ontology\ontology.csv')
+df = pandas.read_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\labeling\template_fmv_cdao_labels_tabulated.csv')
+ontology_df = pandas.read_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\ontology\ontology.csv')
 labels_df = spark.createDataFrame(df)
 ontology_df = spark_ontology.createDataFrame(ontology_df)
 labels_df = add_ontology_fields(labels_df, ontology_df)
 
-labels_df.toPandas().to_csv(r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\labeling\template_fmv_cdao_labels.csv', index=False)
+labels_df.toPandas().to_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\labeling\template_fmv_cdao_labels.csv', index=False)

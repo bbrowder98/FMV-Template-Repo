@@ -31,8 +31,8 @@ SCHEMA = T.StructType([
     T.StructField("src_json", T.StringType(), True)
 ])
 
-folder = 'C:\\Users\\benedict.browder\\Desktop\\FMV Data Processing\\raw\\template_fmv_cdao_mapp_metadata'
-output_path = r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\tabulated\fmv_mapp_metadata_tabulated.json'
+folder = 'C:\\Users\\ecs\\Desktop\\FMV Data Processing\\raw\\template_fmv_cdao_mapp_metadata'
+output_path = r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\tabulated\fmv_mapp_metadata_tabulated.json'
 incremental = os.path.isfile(output_path)
 directory = os.listdir(folder)
 
@@ -40,7 +40,7 @@ directory = os.listdir(folder)
 if incremental == True:
     output_spark = SparkSession.builder.appName("output").master("local[2]").getOrCreate()
     output = pandas.read_csv(output_path)
-    output_df = spark.createDataFrame(output)
+    output_df = output_spark.createDataFrame(output)
     output_list = output_df.withColumn("sequence_id", F.concat(F.col("sequence_id"), F.lit(".json"))).select('sequence_id').toPandas()['sequence_id'].tolist()
     directory = [x for x in directory if x not in output_list]
 
@@ -67,4 +67,4 @@ if incremental == True:
     df = output_df.unionByName(df)
 df = df.orderBy(df.sequence_id.desc(), df.modified.desc())
 #saved to json in order to avoid csv cell limit for large json columns
-df.toPandas().to_csv(r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\tabulated\fmv_mapp_metadata_tabulated.json', index=False)
+df.toPandas().to_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\tabulated\fmv_mapp_metadata_tabulated.json', index=False)

@@ -97,10 +97,10 @@ sequence_metadata_spark = SparkSession.builder.appName("sequence_metadata").mast
 mp4s_spark = SparkSession.builder.appName("mp4_metadata").master("local[3]").getOrCreate()
 jpegs_spark = SparkSession.builder.appName("sequence_metadata").master("local[4]").getOrCreate()
 
-mapp_metadata = pandas.read_csv(r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\tabulated\template_fmv_mapp_metadata_parsed.csv')
-sequence_metadata = pandas.read_csv(r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\tabulated\template_fmv_seq_metadata_tabulated.csv')
-mp4s = pandas.read_csv(r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\tabulated\template_fmv_mp4s_tabulated.csv')
-jpegs = pandas.read_csv(r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\tabulated\template_fmv_jpegs_tabulated.csv')
+mapp_metadata = pandas.read_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\tabulated\template_fmv_mapp_metadata_parsed.csv')
+sequence_metadata = pandas.read_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\tabulated\template_fmv_seq_metadata_tabulated.csv')
+mp4s = pandas.read_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\tabulated\template_fmv_mp4s_tabulated.csv')
+jpegs = pandas.read_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\tabulated\template_fmv_jpegs_tabulated.csv')
 
 mapp_metadata_df = mapp_metadata_spark.createDataFrame(mapp_metadata)
 sequence_metadata_df = sequence_metadata_spark.createDataFrame(sequence_metadata)
@@ -137,4 +137,4 @@ df = df.drop("modified")
 
 df = df.transform(filter_to_cdao_only)  # ensure we are only using CDAO data going forward
 df = df.repartition(5, "src_record_key")
-df.toPandas().to_csv(r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\tabulated\template_fmv_sequences_unenriched.csv', index=False)
+df.toPandas().to_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\tabulated\template_fmv_sequences_unenriched.csv', index=False)

@@ -21,8 +21,8 @@ SCHEMA = T.StructType([
     T.StructField("filesize_bytes", T.IntegerType(), False)
 ])
 
-folder = r'C:\Users\benedict.browder\Desktop\FMV Data Processing\raw\template_fmv_cdao_jpegs'
-output_path = r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\tabulated\template_fmv_jpegs_tabulated.csv'
+folder = r'C:\Users\ecs\Desktop\FMV Data Processing\raw\template_fmv_cdao_jpegs'
+output_path = r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\tabulated\template_fmv_jpegs_tabulated.csv'
 incremental = os.path.isfile(output_path)
 directory = os.listdir(folder)
 
@@ -30,7 +30,7 @@ directory = os.listdir(folder)
 if incremental == True:
     output_spark = SparkSession.builder.appName("output").master("local[2]").getOrCreate()
     output = pandas.read_csv(output_path)
-    output_df = spark.createDataFrame(output)
+    output_df = output_spark.createDataFrame(output)
     output_list = output_df.withColumn("sequence_id", F.concat(F.col("sequence_id"), F.lit(".zip"))).select('sequence_id').toPandas()['sequence_id'].tolist()
     directory = [x for x in directory if x not in output_list]
 
@@ -53,5 +53,6 @@ df = spark.createDataFrame(rows, SCHEMA)
 if incremental == True:
     df = output_df.unionByName(df)
 df = df.orderBy(df.modified.desc(), df.sequence_id)
-df.toPandas().to_csv(r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\tabulated\template_fmv_jpegs_tabulated.csv', index=False)
+
+df.toPandas().to_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\tabulated\template_fmv_jpegs_tabulated.csv', index=False)
  

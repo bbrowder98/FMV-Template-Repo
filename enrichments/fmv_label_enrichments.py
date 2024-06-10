@@ -68,7 +68,7 @@ def rename_label_report_columns(df):
         "label_ingest_date",
         "label_legacy",
         "label_source"
-    )
+    ).dropDuplicates(["sequence_id"])
 
 
 def is_labeled(col):
@@ -84,8 +84,8 @@ def add_label_size_to_filesize(df):
     df = df.drop("label_filesize_bytes")
     return df
 
-df = pandas.read_csv(r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\labeling\template_fmv_cdao_labels.csv')
-sequences = pandas.read_csv(r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\enrichments\template_fmv_sequences_split.csv')
+df = pandas.read_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\labeling\template_fmv_cdao_labels.csv')
+sequences = pandas.read_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\enrichments\template_fmv_sequences_split.csv')
 labels_df = spark.createDataFrame(df)
 sequences_df = spark_sequences.createDataFrame(sequences)
 labels_df = labels_df.withColumn("annotations", annotation_struct())
@@ -98,6 +98,5 @@ sequences_df = sequences_df.join(label_reports_df, "sequence_id", "left")
 sequences_df = sequences_df.withColumn("is_labeled", is_labeled(F.col("label_version")))
 sequences_df = sequences_df.transform(add_label_size_to_filesize)
 
-#saved to json in order to avoid csv cell limit for large json columns
-sequences_df.toPandas().to_csv(r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\enrichments\template_fmv_sequences_full.json', index=False)
-sequences_df = spark.createDataFrame(df)
+#saved to json in order to avoid csv cell limit for large dictionary values
+sequences_df.toPandas().to_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\enrichments\template_fmv_sequences_full.json', index=False)
