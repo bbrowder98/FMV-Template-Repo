@@ -41,15 +41,6 @@ def batch(filepath_col, index):
     '''Extracts the name of the batch using one of the sequence's raw file's filepaths.'''
     return F.split(filepath_col, "/")[index]
 
-def locator(rid_col, filepath_col, branch: str = "master", suffix=None):
-    '''Creates a locator string that describes the originating database, its branch, and filepath of a sequence. If
-    for some reason the rid dataset is not provided, then the locator string is simply null.'''
-    locator = F.concat_ws(":", F.element_at(F.split(rid_col, "\\."), -1), F.lit(branch), filepath_col)
-    if suffix is not None:
-        locator = F.concat(locator, F.lit(suffix))
-    return (F.when(rid_col.isNull(), F.lit(None)).otherwise(locator))
-
-
 def is_maritime(filepath_col):
     '''Describes whether or not a sequence contains maritime data by checking the sequence's filepath for particular
     keywords. As new FMV maritime batches are added, they should be added to the logic here.'''

@@ -9,6 +9,7 @@ import json
 os.environ['PYSPARK_PYTHON'] = sys.executable
 os.environ['PYSPARK_DRIVER_PYTHON'] = sys.executable
 
+#adjust memory if needed
 spark = SparkSession.builder.appName("test").master("local[1]").config("spark.driver.memory", "8g").config("spark.driver.memory", "15g").getOrCreate()
 
 def to_timestamp(time_col):
@@ -167,10 +168,6 @@ def convert_polygonal_coords(df):
     init_df = init_df.drop("xMin", "xMax", "yMin", "yMax", "coords", "points")
     return init_df
 
-@F.udf(T.StringType())
-def json_to_string(arr):
-    return json.dumps(arr)
-
 
 SCHEMA = T.StructType([
     T.StructField("filepath", T.StringType(), False),
@@ -183,13 +180,14 @@ folder = r'C:\Users\benedict.browder\Desktop\FMV Data Processing\raw\Avalanche_U
 output_path = r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\labeling\template_fmv_cdao_labels_tabulated.csv'
 incremental = os.path.isfile(output_path)
 directory = os.listdir(folder)
+
+#Comment out incremental in order to run through all files
 if incremental == True:
     output_spark = SparkSession.builder.appName("output").master("local[2]").getOrCreate()
     output = pandas.read_csv(output_path)
     output_df = spark.createDataFrame(output)
     output_list = output_df.withColumn("dataset_name", F.concat(F.col("dataset_name"), F.lit(".json"))).select('dataset_name').toPandas()['dataset_name'].tolist()
     directory = [x for x in directory if x not in output_list]
-    print(directory)
 
 rows = []
 for name in directory:
@@ -231,6 +229,8 @@ if directory != []:
     labels_df = labels_df.drop("labels")
     labels_df = labels_df.transform(explode_coordinates)
     labels_df = labels_df.withColumn("traits", F.to_json(F.col("traits")))
+
+#Comment out incremental in order to run through all files
 if incremental == True:
     labels_df = output_df.unionByName(labels_df)
 labels_df.toPandas().to_csv(r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\labeling\template_fmv_cdao_labels_tabulated.csv', index=False)

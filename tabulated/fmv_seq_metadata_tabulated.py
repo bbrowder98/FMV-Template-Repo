@@ -43,17 +43,17 @@ SCHEMA = T.StructType([
 ])
 
 folder = r'C:\Users\benedict.browder\Desktop\FMV Data Processing\raw\template_fmv_cdao_seq_metadata'
-output_path = r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\tabulated\template_fmv_mp4s_tabulated.csv'
+output_path = r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\tabulated\template_fmv_seq_metadata_tabulated.csv'
 incremental = os.path.isfile(output_path)
 directory = os.listdir(folder)
 
+#Comment out incremental in order to run through all files
 if incremental == True:
     output_spark = SparkSession.builder.appName("output").master("local[2]").getOrCreate()
     output = pandas.read_csv(output_path)
     output_df = spark.createDataFrame(output)
     output_list = output_df.withColumn("sequence_id", F.concat(F.col("sequence_id"), F.lit(".json"))).select('sequence_id').toPandas()['sequence_id'].tolist()
     directory = [x for x in directory if x not in output_list]
-    print(directory)
 
 rows = []
 for name in directory:
@@ -73,5 +73,10 @@ for name in directory:
 df = spark.createDataFrame(rows, SCHEMA)
 df = expand_json_column(df, "src_json", "metadata", "src_metadata")
 df = df.withColumnRenamed("heigth", "height")
+
+#Comment out incremental in order to run through all files
+if incremental == True:
+    df = output_df.unionByName(df)
+
 df = df.orderBy(df.modified.desc(), df.sequence_id)
 df.toPandas().to_csv(r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\tabulated\template_fmv_seq_metadata_tabulated.csv', index=False)

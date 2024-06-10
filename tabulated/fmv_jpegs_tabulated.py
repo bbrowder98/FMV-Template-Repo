@@ -26,13 +26,13 @@ output_path = r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\t
 incremental = os.path.isfile(output_path)
 directory = os.listdir(folder)
 
+#Comment out incremental in order to run through all files
 if incremental == True:
     output_spark = SparkSession.builder.appName("output").master("local[2]").getOrCreate()
     output = pandas.read_csv(output_path)
     output_df = spark.createDataFrame(output)
     output_list = output_df.withColumn("sequence_id", F.concat(F.col("sequence_id"), F.lit(".zip"))).select('sequence_id').toPandas()['sequence_id'].tolist()
     directory = [x for x in directory if x not in output_list]
-    print(directory)
 
 rows = []
 for name in directory:
@@ -48,6 +48,8 @@ for name in directory:
     rows.append(row_contents)
 
 df = spark.createDataFrame(rows, SCHEMA)
+
+#Comment out incremental in order to run through all files
 if incremental == True:
     df = output_df.unionByName(df)
 df = df.orderBy(df.modified.desc(), df.sequence_id)

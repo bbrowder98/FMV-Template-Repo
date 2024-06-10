@@ -8,6 +8,7 @@ import json
 os.environ['PYSPARK_PYTHON'] = sys.executable
 os.environ['PYSPARK_DRIVER_PYTHON'] = sys.executable
 
+#adjust memory if needed
 spark = SparkSession.builder.appName("test").master("local[1]").config("spark.driver.memory", "15g").getOrCreate()
 
 df = pandas.read_csv(r'C:\Users\benedict.browder\Desktop\FMV Data Processing\datasets\enrichments\template_fmv_sequences_full.json', dtype=str, keep_default_na=False)

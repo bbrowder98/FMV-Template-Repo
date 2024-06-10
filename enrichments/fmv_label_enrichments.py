@@ -8,6 +8,7 @@ import json
 os.environ['PYSPARK_PYTHON'] = sys.executable
 os.environ['PYSPARK_DRIVER_PYTHON'] = sys.executable
 
+#adjust memory if needed
 spark = SparkSession.builder.appName("test").master("local[1]").config("spark.driver.memory", "15g").getOrCreate()
 spark_sequences = SparkSession.builder.appName("ontology").master("local[2]").getOrCreate()
 
