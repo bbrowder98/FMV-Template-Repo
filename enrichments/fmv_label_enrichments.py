@@ -98,5 +98,5 @@ sequences_df = sequences_df.join(label_reports_df, "sequence_id", "left")
 sequences_df = sequences_df.withColumn("is_labeled", is_labeled(F.col("label_version")))
 sequences_df = sequences_df.transform(add_label_size_to_filesize)
 
-#saved to json in order to avoid csv cell limit for large dictionary values
-sequences_df.toPandas().to_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\enrichments\template_fmv_sequences_full.json', index=False)
+#Convert to .json file if dictionary value is over csv limit of 32767 characters per cell
+sequences_df.toPandas().to_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\enrichments\template_fmv_sequences_full.csv', index=False)

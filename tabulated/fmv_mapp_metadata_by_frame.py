@@ -90,7 +90,7 @@ def avg_center_ires_ft(ires_col1, ires_col2):
 
 spark = SparkSession.builder.appName("test").master("local[1]").getOrCreate()
 
-df = pandas.read_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\tabulated\fmv_mapp_metadata_tabulated.json')
+df = pandas.read_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\tabulated\fmv_mapp_metadata_tabulated.csv')
 metadata_df = spark.createDataFrame(df)
 metadata_df = metadata_df.drop("modified", "filesize_bytes")
 metadata_df = metadata_df.transform(explode_by_frame)

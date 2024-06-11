@@ -14,18 +14,18 @@ spark_mp4 = SparkSession.builder.appName("mp4").master("local[2]").getOrCreate()
 spark_jpeg = SparkSession.builder.appName("jpeg").master("local[3]").getOrCreate()
 spark_mapp = SparkSession.builder.appName("mapp_metadata").master("local[4]").getOrCreate()
 spark_seq = SparkSession.builder.appName("seq_metadata").master("local[5]").getOrCreate()
-df = pandas.read_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\vendor\template_fmv_sequences_vendor.json')
+df = pandas.read_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\vendor\template_fmv_sequences_vendor.csv')
 sequences_df = spark_sequences.createDataFrame(df)
 mp4_pd = pandas.read_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\tabulated\template_fmv_mp4s_tabulated.csv')
 mp4_df = spark_mp4.createDataFrame(mp4_pd)
 jpeg_pd = pandas.read_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\tabulated\template_fmv_jpegs_tabulated.csv')
 jpegs_df = spark_jpeg.createDataFrame(jpeg_pd)
-mapp_pd = pandas.read_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\tabulated\fmv_mapp_metadata_tabulated.json')
+mapp_pd = pandas.read_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\tabulated\fmv_mapp_metadata_tabulated.csv')
 mapp_df = spark_mapp.createDataFrame(mapp_pd)
 seq_pd = pandas.read_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\tabulated\template_fmv_seq_metadata_tabulated.csv')
 seq_df = spark_seq.createDataFrame(seq_pd)
 
-output_path = r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\vendor\template_fmv_vendor_test.json'
+output_path = r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\vendor\template_fmv_vendor_test.csv'
 
 def columns_as_struct(df):
     '''Converts all of the columns of the dataframe as a single struct.'''
@@ -86,5 +86,5 @@ for file_path, file_system in filesystems.items():
     sequences_df = sequences_df.join(file_system.select("sequence_id", "filename", "filepath"), "sequence_id", "left")
     sequences_df.foreach(process_filesystem)
 
-#saved to json in order to avoid csv cell limit for large json columns
-sequences_df.toPandas().to_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\vendor\template_fmv_vendor_test.json', index=False)
+#Convert to .json file if dictionary value is over csv limit of 32767 characters per cell
+sequences_df.toPandas().to_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\vendor\template_fmv_vendor_test.csv', index=False)

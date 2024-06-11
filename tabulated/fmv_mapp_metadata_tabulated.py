@@ -32,7 +32,7 @@ SCHEMA = T.StructType([
 ])
 
 folder = 'C:\\Users\\ecs\\Desktop\\FMV Data Processing\\raw\\template_fmv_cdao_mapp_metadata'
-output_path = r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\tabulated\fmv_mapp_metadata_tabulated.json'
+output_path = r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\tabulated\fmv_mapp_metadata_tabulated.csv'
 incremental = os.path.isfile(output_path)
 directory = os.listdir(folder)
 
@@ -66,5 +66,5 @@ df = spark.createDataFrame(rows, SCHEMA)
 if incremental == True:
     df = output_df.unionByName(df)
 df = df.orderBy(df.sequence_id.desc(), df.modified.desc())
-#saved to json in order to avoid csv cell limit for large json columns
-df.toPandas().to_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\tabulated\fmv_mapp_metadata_tabulated.json', index=False)
+#Convert to .json file if dictionary value is over csv limit of 32767 characters per cell
+df.toPandas().to_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\tabulated\fmv_mapp_metadata_tabulated.csv', index=False)
