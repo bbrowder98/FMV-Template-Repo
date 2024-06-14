@@ -146,7 +146,6 @@ def convert_polygonal_coords(df):
     rectangular bounding boxes.'''
     init_df = df.where(F.col("type") == "AnnoPolygon")
     polygon_df = init_df.select("primary_key", "points")
-    print(init_df.select("label_id", "sequence_id"))
     polygon_df = polygon_df.withColumn("points", F.explode(F.col("points")))
     polygon_df = (
         polygon_df
@@ -191,9 +190,7 @@ if incremental == True:
     output = pandas.read_csv(output_path)
     output_df = output_spark.createDataFrame(output)
     output_list = output_df.withColumn("project_name", F.concat(F.col("project_name"), F.lit(".json"))).select('project_name').distinct().toPandas()['project_name'].tolist()
-    print(output_list)
     directory = [x for x in directory if x not in output_list]
-    print(directory)
 
 if directory != []:
     rows = []
