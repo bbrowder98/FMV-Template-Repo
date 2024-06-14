@@ -44,10 +44,13 @@ SCHEMA = T.StructType([
 
 folder = r'C:\Users\ecs\Desktop\FMV Data Processing\raw\template_fmv_cdao_seq_metadata'
 output_path = r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\tabulated\template_fmv_seq_metadata_tabulated.csv'
+#Checks if output path exists
 incremental = os.path.isfile(output_path)
 directory = os.listdir(folder)
 
-#Comment out incremental in order to run through all files
+#To run through all files uncomment incremental == False
+#incremental == False
+
 if incremental == True:
     output_spark = SparkSession.builder.appName("output").master("local[2]").getOrCreate()
     output = pandas.read_csv(output_path)
@@ -74,7 +77,6 @@ df = spark.createDataFrame(rows, SCHEMA)
 df = expand_json_column(df, "src_json", "metadata", "src_metadata")
 df = df.withColumnRenamed("heigth", "height")
 
-#Comment out incremental in order to run through all files
 if incremental == True:
     df = output_df.unionByName(df)
 

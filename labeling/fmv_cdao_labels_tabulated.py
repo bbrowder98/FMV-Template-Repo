@@ -146,6 +146,7 @@ def convert_polygonal_coords(df):
     rectangular bounding boxes.'''
     init_df = df.where(F.col("type") == "AnnoPolygon")
     polygon_df = init_df.select("primary_key", "points")
+    print(init_df.select("label_id", "sequence_id"))
     polygon_df = polygon_df.withColumn("points", F.explode(F.col("points")))
     polygon_df = (
         polygon_df
@@ -178,33 +179,37 @@ SCHEMA = T.StructType([
 
 folder = r'C:\Users\ecs\Desktop\FMV Data Processing\raw\Avalanche_USCG_20220930_json'
 output_path = r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\labeling\template_fmv_cdao_labels_tabulated.csv'
+#Checks if output path exists
 incremental = os.path.isfile(output_path)
 directory = os.listdir(folder)
 
-#Comment out incremental in order to run through all files
+#To run through all files uncomment incremental == False
+#incremental == False
+
 if incremental == True:
     output_spark = SparkSession.builder.appName("output").master("local[2]").getOrCreate()
     output = pandas.read_csv(output_path)
     output_df = output_spark.createDataFrame(output)
-    output_list = output_df.withColumn("dataset_name", F.concat(F.col("dataset_name"), F.lit(".json"))).select('dataset_name').toPandas()['dataset_name'].tolist()
+    output_list = output_df.withColumn("project_name", F.concat(F.col("project_name"), F.lit(".json"))).select('project_name').distinct().toPandas()['project_name'].tolist()
+    print(output_list)
     directory = [x for x in directory if x not in output_list]
+    print(directory)
 
-rows = []
-for name in directory:
-    # Open file
-    file_path = os.path.join(folder, name)
-    with open(file_path, encoding="utf-8") as json_file:
-        json_data = json_file.read()
-    # file modification timestamp of a file
-    m_time = os.path.getmtime(file_path)
-    size = os.path.getsize(file_path)
-    # convert timestamp into DateTime object
-    modified = datetime.datetime.fromtimestamp(m_time)
-    row_contents = [file_path, str(modified), int(size), json_data]
-    rows.append(row_contents)
-
-labels_df = spark.createDataFrame(rows, SCHEMA)
 if directory != []:
+    rows = []
+    for name in directory:
+        # Open file
+        file_path = os.path.join(folder, name)
+        with open(file_path, encoding="utf-8") as json_file:
+            json_data = json_file.read()
+        # file modification timestamp of a file
+        m_time = os.path.getmtime(file_path)
+        size = os.path.getsize(file_path)
+        # convert timestamp into DateTime object
+        modified = datetime.datetime.fromtimestamp(m_time)
+        row_contents = [file_path, str(modified), int(size), json_data]
+        rows.append(row_contents)
+    labels_df = spark.createDataFrame(rows, SCHEMA)
     labels_df = expand_json_column(labels_df, "src_json")
     labels_df = labels_df.transform(rename_columns)
     labels_df = labels_df.drop("src_json")  # drop already parsed columns
@@ -230,7 +235,8 @@ if directory != []:
     labels_df = labels_df.transform(explode_coordinates)
     labels_df = labels_df.withColumn("traits", F.to_json(F.col("traits")))
 
-#Comment out incremental in order to run through all files
-if incremental == True:
-    labels_df = output_df.unionByName(labels_df)
-labels_df.toPandas().to_csv(r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\labeling\template_fmv_cdao_labels_tabulated.csv', index=False)
+    if incremental == True:
+        labels_df = output_df.unionByName(labels_df)
+    labels_df.toPandas().to_csv(output_path, index=False)
+else:
+    output_df.toPandas().to_csv(output_path, index=False)
