@@ -32,6 +32,7 @@ directory = os.listdir(folder)
 #incremental = False
 
 if incremental == True:
+    #Creates spark session for output dataset
     output_spark = SparkSession.builder.appName("output").master("local[2]").getOrCreate()
     output = pandas.read_csv(output_path)
     output_df = output_spark.createDataFrame(output)
@@ -41,11 +42,17 @@ if incremental == True:
 rows = []
 for batch in directory:
     batch_name = batch
+    #Identifies batch filepath
     batch_path = os.path.join(folder, batch)
+    #Identifies batch directory
     batch = os.listdir(batch_path)
+    #Runs through each image
     for files in batch:
+        #Identifies image filepath
         image_path = os.path.join(batch_path, files, "seq_zip")
+        #Identifies image directory
         image = os.listdir(image_path)[0]
+        #Identifies jpeg filepath
         file_path = os.path.join(image_path, image)
         # file modification timestamp of a file
         m_time = os.path.getmtime(file_path)

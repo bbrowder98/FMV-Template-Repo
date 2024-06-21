@@ -182,14 +182,17 @@ output_path = r'C:\Users\ecs\Desktop\FMV Data Processing\datasets\labeling\templ
 incremental = os.path.isfile(output_path)
 directory = os.listdir(folder)
 
-#To run through all files uncomment incremental == False
-#incremental == False
+#To run through all files uncomment incremental = False
+#incremental = False
 
 if incremental == True:
+    #Creates spark session for output dataset
     output_spark = SparkSession.builder.appName("output").master("local[2]").getOrCreate()
     output = pandas.read_csv(output_path)
     output_df = output_spark.createDataFrame(output)
+    #Grabs all project names from output dataset
     output_list = output_df.withColumn("project_name", F.concat(F.col("project_name"), F.lit(".json"))).select('project_name').distinct().toPandas()['project_name'].tolist()
+    #Checks directory to see if previous label files have been looked at in order to avoid rerunning previously saved metadata.
     directory = [x for x in directory if x not in output_list]
 
 if directory != []:
@@ -197,10 +200,12 @@ if directory != []:
     for name in directory:
         # Open file
         file_path = os.path.join(folder, name)
+        # Reads through file
         with open(file_path, encoding="utf-8") as json_file:
             json_data = json_file.read()
         # file modification timestamp of a file
         m_time = os.path.getmtime(file_path)
+        # Grabs size of object
         size = os.path.getsize(file_path)
         # convert timestamp into DateTime object
         modified = datetime.datetime.fromtimestamp(m_time)
