@@ -10,7 +10,7 @@ os.environ['PYSPARK_PYTHON'] = sys.executable
 os.environ['PYSPARK_DRIVER_PYTHON'] = sys.executable
 
 #adjust memory if needed
-spark = SparkSession.builder.appName("test").master("local[1]").config("spark.driver.memory", "8g").config("spark.driver.memory", "15g").getOrCreate()
+spark = SparkSession.builder.appName("test").master("local[1]").config("spark.driver.memory", "15g").getOrCreate()
 
 def to_timestamp(time_col):
     '''Converts the value of the modified column into a proper Timestamp column.'''
