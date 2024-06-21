@@ -81,6 +81,8 @@ filesystems = {
         "mapp_metadata_filepath": mapp_df.withColumn("filename", mapp_filename(F.col("sequence_id"))),
         "seq_metadata_filepath": seq_df.withColumn("filename", seq_filename(F.col("sequence_id")))
     }
+
+#Creates vendor files
 for file_path, file_system in filesystems.items():
     sequences_df = sequences_df.drop("filename", "filepath")
     sequences_df = sequences_df.join(file_system.select("sequence_id", "filename", "filepath"), "sequence_id", "left")
