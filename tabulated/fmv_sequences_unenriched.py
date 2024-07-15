@@ -29,11 +29,11 @@ def deduplicate_jpegs(df):
 
 
 def prepare_schema_for_merge(df, prefix, drop_modified: bool = True):
-    '''Renames DMP metadata columns (e.g., filepath, filesize, rid, etc.) to prevent collisions and optionally
+    '''Renames DMP metadata columns (e.g., filepath, filesize, batch_path, etc.) to prevent collisions and optionally
     drops the modified column.'''
     df = df.withColumnRenamed("filepath", f"{prefix}_filepath")
     df = df.withColumnRenamed("filesize_bytes", f"{prefix}_filesize_bytes")
-    df = df.withColumnRenamed("dataset_rid", f"{prefix}_dataset_rid")
+    df = df.withColumnRenamed("batch_path", f"{prefix}_batch_path")
     if drop_modified:
         df = df.drop("modified")
     return df

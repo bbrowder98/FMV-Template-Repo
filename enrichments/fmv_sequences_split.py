@@ -32,7 +32,7 @@ def split(hash_col):
 
 
 def split_strategy():
-    '''Typically, sequences are split as 80% training, 10% test, and 80% validation based on the split_key, which is
+    '''Typically, sequences are split as 80% training, 10% test, and 10% validation based on the split_key, which is
     classified as "split_key_split". However, sequences could also be split using alternative strategies, such as
     assigning all sequences of a particular source record key as the same split. In this case, we are simply splitting
     all sequences using the split_key_split strategy.'''
